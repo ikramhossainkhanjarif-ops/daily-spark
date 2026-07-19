@@ -57,15 +57,31 @@ class AlarmRingingService : Service() {
         startActivity(activityIntent)
     }
 
-    private fun buildNotification(alarmId: String, label: String) =
-        NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(if (label.isNotBlank()) label else "Daily Spark alarm")
-            .setContentText("Tap to open your morning spark")
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setOngoing(true)
-            .build()
+  private fun buildNotification(alarmId: String, label: String): Notification {
+    val activityIntent = Intent(this, MainActivity::class.java).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        action = "AlarmSchedule.ACTION_LAUNCH_RING"
+        putExtra("AlarmReceiver.EXTRA_ALARM_ID", alarmId)
+    }
+
+    val fullScreenPendingIntent = PendingIntent.getActivity(
+        this,
+        alarmId.hashCode(),
+        activityIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    return NotificationCompat.Builder(this, CHANNEL_ID)
+        .setContentTitle(label.ifEmpty { "Alarm" })
+        .setContentText("Tap to open alarm screen")
+        .setSmallIcon(R.mipmap.ic_launcher)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setCategory(NotificationCompat.CATEGORY_ALARM)
+        .setOngoing(true)
+        .setContentIntent(fullScreenPendingIntent)
+        .setFullScreenIntent(fullScreenPendingIntent, true)
+        .build()
+}
 
     private fun playSound(soundId: String) {
         mediaPlayer?.release()
