@@ -1,5 +1,6 @@
 package com.dailyspark.app
 
+import android.app.Notification 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -15,12 +16,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
-/**
- * Foreground service that owns audio + vibration while an alarm is
- * ringing, and launches the full-screen ringing Activity over the
- * lock screen. Kept alive independently of the Flutter engine so
- * ringing continues even if the UI hasn't attached yet.
- */
+
 class AlarmRingingService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -57,31 +53,31 @@ class AlarmRingingService : Service() {
         startActivity(activityIntent)
     }
 
-  private fun buildNotification(alarmId: String, label: String): Notification {
-    val activityIntent = Intent(this, MainActivity::class.java).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        action = "AlarmSchedule.ACTION_LAUNCH_RING"
-        putExtra("AlarmReceiver.EXTRA_ALARM_ID", alarmId)
+    private fun buildNotification(alarmId: String, label: String): Notification {
+        val activityIntent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            action = "AlarmSchedule.ACTION_LAUNCH_RING"
+            putExtra("AlarmReceiver.EXTRA_ALARM_ID", alarmId)
+        }
+
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            this,
+            alarmId.hashCode(),
+            activityIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(label.ifEmpty { "Alarm" })
+            .setContentText("Tap to open alarm screen")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setOngoing(true)
+            .setContentIntent(fullScreenPendingIntent)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
+            .build()
     }
-
-    val fullScreenPendingIntent = PendingIntent.getActivity(
-        this,
-        alarmId.hashCode(),
-        activityIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    return NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle(label.ifEmpty { "Alarm" })
-        .setContentText("Tap to open alarm screen")
-        .setSmallIcon(R.mipmap.ic_launcher)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setCategory(NotificationCompat.CATEGORY_ALARM)
-        .setOngoing(true)
-        .setContentIntent(fullScreenPendingIntent)
-        .setFullScreenIntent(fullScreenPendingIntent, true)
-        .build()
-}
 
     private fun playSound(soundId: String) {
         mediaPlayer?.release()
