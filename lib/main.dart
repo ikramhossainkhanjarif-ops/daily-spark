@@ -38,6 +38,16 @@ void main() {
   });
 
   runApp(const DailySparkApp());
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    final pendingAlarmId = await _nativeBridge.consumePendingLaunchAlarm();
+    if (pendingAlarmId != null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => RingingPage(alarmId: pendingAlarmId),
+        ),
+      );
+    }
+  });
 }
 
 class DailySparkApp extends StatelessWidget {
