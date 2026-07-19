@@ -13,7 +13,9 @@ class NativeAlarmBridge {
   Future<void> scheduleAlarm(Map<String, dynamic> payload) async {
     await _channel.invokeMethod('scheduleAlarm', payload);
   }
-
+Future<String?> consumePendingLaunchAlarm() async {
+    return await _channel.invokeMethod<String>('consumePendingLaunchAlarm');
+  }
   Future<void> cancelAlarm(String id) async {
     await _channel.invokeMethod('cancelAlarm', {'id': id});
   }
