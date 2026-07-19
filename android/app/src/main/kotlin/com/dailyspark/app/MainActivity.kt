@@ -27,7 +27,7 @@ class MainActivity : FlutterActivity() {
         captureAlarmIntent(intent)
         val id = intent.getStringExtra("AlarmReceiver.EXTRA_ALARM_ID")
         if (intent.action == "AlarmSchedule.ACTION_LAUNCH_RING" && id != null) {
-            AlarmSchedulerPlugin.sendAlarmToFlutter(id)
+            AlarmSchedulerPlugin.instance?.notifyAlarmFiring(id)
         }
     }
 
