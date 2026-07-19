@@ -2,6 +2,7 @@ package com.dailyspark.app
 
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Intent 
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -26,7 +27,6 @@ class MainActivity : FlutterActivity() {
         captureAlarmIntent(intent)
         val id = intent.getStringExtra("AlarmReceiver.EXTRA_ALARM_ID")
         if (intent.action == "AlarmSchedule.ACTION_LAUNCH_RING" && id != null) {
-           
             AlarmSchedulerPlugin.sendAlarmToFlutter(id)
         }
     }
@@ -36,12 +36,8 @@ class MainActivity : FlutterActivity() {
             pendingLaunchAlarmId = intent.getStringExtra("AlarmReceiver.EXTRA_ALARM_ID")
         }
     }
-}
-    /**
-     * Ensures the full-screen ringing UI shows above the lock screen
-     * and turns the screen on, matching behaviour expected of a
-     * native alarm clock app.
-     */
+
+   
     private fun applyLockScreenFlags() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -63,4 +59,4 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AlarmSchedulerPlugin())
     }
-}
+} 
