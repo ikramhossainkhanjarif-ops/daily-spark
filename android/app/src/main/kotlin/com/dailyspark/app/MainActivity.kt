@@ -9,13 +9,34 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity : FlutterActivity() {
+    companion object {
+        var pendingLaunchAlarmId: String? = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        applyLockScreenFlags()
+        
+        applyLockScreenFlags() 
         AlarmRingingService.createNotificationChannel(this)
+        captureAlarmIntent(intent)
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        captureAlarmIntent(intent)
+        val id = intent.getStringExtra("AlarmReceiver.EXTRA_ALARM_ID")
+        if (intent.action == "AlarmSchedule.ACTION_LAUNCH_RING" && id != null) {
+           
+            AlarmSchedulerPlugin.sendAlarmToFlutter(id)
+        }
+    }
+
+    private fun captureAlarmIntent(intent: Intent) {
+        if (intent.action == "AlarmSchedule.ACTION_LAUNCH_RING") {
+            pendingLaunchAlarmId = intent.getStringExtra("AlarmReceiver.EXTRA_ALARM_ID")
+        }
+    }
+}
     /**
      * Ensures the full-screen ringing UI shows above the lock screen
      * and turns the screen on, matching behaviour expected of a
