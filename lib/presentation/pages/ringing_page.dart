@@ -31,6 +31,8 @@ class _RingingPageState extends State<RingingPage>
 
   MotivationalMessage? _message;
   late final AnimationController _pulseController;
+  
+  bool _readyToPop = false;
 
   @override
   void initState() {
@@ -57,20 +59,29 @@ class _RingingPageState extends State<RingingPage>
     super.dispose();
   }
 
+
   Future<void> _onSnooze() async {
     await _nativeBridge.snoozeAlarm(widget.alarmId, widget.snoozeMinutes);
-    if (mounted) Navigator.of(context).maybePop();
+    if (!mounted) return;
+    
+    setState(() => _readyToPop = true);
+    Navigator.of(context).maybePop();
   }
 
+ 
   Future<void> _onDismiss() async {
     await _nativeBridge.dismissAlarm(widget.alarmId);
-    if (mounted) Navigator.of(context).maybePop();
+    if (!mounted) return;
+
+    setState(() => _readyToPop = true);
+    Navigator.of(context).maybePop();
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // require explicit Snooze/Dismiss
+
+      canPop: _readyToPop, // requires explicit Snooze/Dismiss
       child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
