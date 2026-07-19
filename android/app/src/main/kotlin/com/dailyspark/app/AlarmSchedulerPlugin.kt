@@ -45,6 +45,11 @@ class AlarmSchedulerPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "consumePendingLaunchAlarm" -> {
+    val id = MainActivity.pendingLaunchAlarmId
+    MainActivity.pendingLaunchAlarmId = null
+    result.success(id)
+}
             "scheduleAlarm" -> {
                 val args = call.arguments as Map<*, *>
                 val entry = NativeAlarmStore.AlarmEntry.fromMethodArgs(args)
